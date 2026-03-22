@@ -31,6 +31,7 @@ trip_distance_km= []
 avg_speed= []
 is_suspicious = [] # an array to tell if data is funky
 dayofweek = []
+wd = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 def reading():
     a=1 
@@ -52,7 +53,7 @@ def reading():
         end_station.append(temp)
         bike_number.append(data[6])
         bike_model.append(data[7])
-        duration_min.append(data[8])
+        duration_min.append(float(data[8]))
         trip_category.append(data[9])
         trip_type.append(data[10])
         start_hour.append(data[11])
@@ -67,7 +68,7 @@ def reading():
         start_long.append(data[20])
         end_lat.append(data[21])
         end_long.append(data[22])
-        trip_distance_km.append(data[23])
+        trip_distance_km.append(float(data[23]))
         avg_speed.append(data[24])
     f.close()
 #above works
@@ -155,16 +156,134 @@ def csvmaker():
     return
         
 def finddays():
-    wd = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     for i in range(len(start_date)):
         time_s = datetime.strptime((start_date[i].replace("/","-")), "%d-%m-%Y %H:%M")
         day = wd[time_s.weekday()]
         dayofweek.append(day)
     return
 
-def days_analysis():
-    finddays()
+def dayinputvalidation():
+    targetday = input("which day of the week are you interested in?: ")
+    goodinput = False
+    for i in range(7):
+        if targetday.upper()==wd[i].upper(): #.upper to ignore capitalisation
+            goodinput = True
+            targetday = wd[i] # use this to ignore capitalisation in future
+    if goodinput:
+        print(targetday)
+        return targetday
+    else:
+        print("Bad input please enter a day of the week: ")
+        targetday = dayinputvalidation()
+        return targetday
 
+def popping(popitems):
+    popitems.sort(reverse=True) # sort desc so pop doesnt change array traversal
+    for i in range(len(popitems)):
+        start_date.pop(popitems[i])
+        start_station.pop(popitems[i])
+        end_date.pop(popitems[i])
+        end_station.pop(popitems[i])
+        bike_number.pop(popitems[i])
+        bike_model.pop(popitems[i])
+        duration_min.pop(popitems[i])
+        trip_category.pop(popitems[i])
+        trip_type.pop(popitems[i])
+        start_hour.pop(popitems[i])
+        start_day.pop(popitems[i])
+        start_month.pop(popitems[i])
+        is_weekend.pop(popitems[i])
+        is_rush_hour.pop(popitems[i])
+        rush_period.pop(popitems[i])
+        station_risk_score.pop(popitems[i])
+        bike_instability_score.pop(popitems[i])
+        start_lat.pop(popitems[i])
+        start_long.pop(popitems[i])
+        end_lat.pop(popitems[i])
+        end_long.pop(popitems[i])
+        trip_distance_km.pop(popitems[i])
+        avg_speed.pop(popitems[i])
+        is_suspicious.pop(popitems[i])
+        dayofweek.pop(popitems[i])
+    return
+        
+def dayfilter():
+    day = dayinputvalidation()
+    popitems=[]
+    for i in range (len(start_date)):
+        if dayofweek[i] != day:
+            popitems.append(i)
+    popping(popitems)
+
+def bigdistfilter():
+    a= input("Enter a minmum distance: ")
+    invalid = True
+    while invalid:
+        try:
+            float(a)
+            invalid = False
+        except ValueError:
+            a = input("Enter a float: ")
+            invalid = True
+    a = float(a)
+    popitems = []
+    for i in range(len(start_date)):
+        if trip_distance_km[i]<a:
+            popitems.append(i)
+    popping(popitems)
+
+def analysis():
+
+    number_of_journeys= 0 
+    minduration = 0 # will change from 0 in program
+    maxduration = 0 # duration cant be negative 
+    avg_duration = 0
+    maxdist = 0 # dist cant be negative
+    mindist = 0 # will change from 0 in program
+    avgdist = 0
+    for i in range(len(start_date)):
+        number_of_journeys+=1
+        if duration_min[i]<minduration or minduration==0:
+                minduration=duration_min[i]
+        if duration_min[i]>maxduration: # duration cant be negative 
+            maxduration=duration_min[i]
+        avg_duration+=duration_min[i] # add all values and divide at end
+        if trip_distance_km[i]>maxdist:
+            maxdist= trip_distance_km[i]
+        if trip_distance_km[i]<mindist or mindist==0:
+            mindist=trip_distance_km[i]
+        avgdist+=trip_distance_km[i]
+    if number_of_journeys>0:
+        avg_duration = avg_duration/number_of_journeys # makes an average
+        avgdist = avgdist/number_of_journeys # makes an average
+    #---------Below is just printing
+    print("The total number of journeys made is "+str(number_of_journeys))
+    print("The maximum duration of journeys made is "+str(maxduration))
+    print("The minimum duration of journeys made is "+str(minduration))
+    print("The average duration of journeys made is "+str(avg_duration))
+    print("The maximum distance of journeys made is "+str(maxdist))
+    print("The minimum distance of journeys made is "+str(mindist))
+    print("The average distance of journeys made is "+str(avgdist))
+
+def filterhandle():
+    print("""
+          ---------------------------
+          Which filter would you like
+          1. Day of the Week
+          2. Distance Greater than X
+          3. Journeys between the hours of X and Y
+          4. Journeys starting in a specific area
+          5. Suspicious data (has values that dont match)
+          Continue later
+          """)
+    selection = input("- ")
+    while selection != "1" and selection != "2" and selection != "3" and selection !=4:
+        selection = input("Bad input enter a number 1-4: ")
+    if selection =="1":
+        dayfilter()
+    elif selection =="2":
+        bigdistfilter()
+        
 
 def station_useage():
     station_data()
@@ -201,13 +320,10 @@ def station_useage():
     if csv.upper() == "Y":
         csvmaker() 
     return
-
-
-    
-
+ 
 reading()
 validate()
-#print(is_suspicious)
-station_useage()
-#print(avg_speed)
-#print(stations)
+finddays()
+#station_useage()
+filterhandle()
+analysis()
