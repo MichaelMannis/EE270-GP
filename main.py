@@ -232,6 +232,61 @@ def bigdistfilter():
             popitems.append(i)
     popping(popitems)
 
+def areavalid():
+    matching = False
+    area = input("Please enter an area: ")
+    area = area.replace(" ","")
+    go = ""
+    for i in range(len(start_date)):
+        end_data = end_station[i].split(",")
+        endnew = end_data[1]
+        start_data = start_station[i].split(",")
+        new = start_data[1] # gets the bit after the comma
+        endnew = endnew.replace(" ","").replace('"',"")
+        new = new.replace(" ","").replace('"',"")
+        if area.upper() == new.upper() or area.upper() == endnew.upper():
+            matching= True
+    if matching== False:
+        print("There were no results found for this area do you wish to retry")
+        go = input("Y/N: ")
+        while go.upper() != "Y" and go.upper() != "N":
+            print("Bad input")
+            go = input("There were no results found for this area do you wish to retry (Y/N): ")
+    if go.upper() == "Y":
+        area = areavalid()
+        return area
+    elif go.upper() == "N":
+        return area
+    return area
+    
+
+def startareafilter(area):
+    popitems = []
+    for i in range(len(start_date)):
+        data = start_station[i].split(",")
+        new = data[1] # gets the bit after the comma
+        if area.upper().replace(" ","") != new.upper().replace(" ","").replace('"',""):#remove spaces and "
+            popitems.append(i)
+    popping(popitems)
+
+def endareafilter(area):
+    popitems = []
+    for i in range(len(start_date)):
+        data = end_station[i].split(",")
+        new = data[1] # gets the bit after the comma
+        if area.upper().replace(" ","") != new.upper().replace(" ","").replace('"',""):#remove spaces and "
+            popitems.append(i)
+    popping(popitems)
+        
+
+
+def suspiciousdatafilter():
+    popitems = []
+    for i in range(len(start_date)):
+        if is_suspicious[i] !="Not":
+            popitems.append(i)
+    popping(popitems)
+
 def analysis():
 
     number_of_journeys= 0 
@@ -241,6 +296,9 @@ def analysis():
     maxdist = 0 # dist cant be negative
     mindist = 0 # will change from 0 in program
     avgdist = 0
+    if len(start_date)== 0:
+        print("There is no matching data for your current filters.")
+        return
     for i in range(len(start_date)):
         number_of_journeys+=1
         if duration_min[i]<minduration or minduration==0:
@@ -266,24 +324,34 @@ def analysis():
     print("The average distance of journeys made is "+str(avgdist))
 
 def filterhandle():
+    area = ""
     print("""
           ---------------------------
           Which filter would you like
           1. Day of the Week
           2. Distance Greater than X
-          3. Journeys between the hours of X and Y
-          4. Journeys starting in a specific area
+          3. Journeys starting in a specific area
+          4. Journeys ending in a specific area
           5. Suspicious data (has values that dont match)
           Continue later
           """)
     selection = input("- ")
-    while selection != "1" and selection != "2" and selection != "3" and selection !=4:
-        selection = input("Bad input enter a number 1-4: ")
+    while selection != "1" and selection != "2" and selection != "3" and selection !="4" and selection != "5":
+        selection = input("Bad input enter a number 1-5: ")
     if selection =="1":
         dayfilter()
     elif selection =="2":
         bigdistfilter()
-        
+    elif selection =="3":
+        area = areavalid()
+        startareafilter(area)
+    elif selection == "4":
+        area = areavalid()
+        endareafilter(area)
+    elif selection =="5":
+        suspiciousdatafilter()
+
+
 
 def station_useage():
     station_data()
