@@ -186,7 +186,6 @@ def dayinputvalidation():
             goodinput = True
             targetday = wd[i] # use this to ignore capitalisation in future
     if goodinput:
-        print(targetday)
         return targetday
     else:
         print("Bad input please enter a day of the week: ")
@@ -364,6 +363,13 @@ def filterhandle():
         endareafilter(area)
     elif selection =="5":
         suspiciousdatafilter()
+    go = input("Would you like to add another filter? (Y/N):")
+    while go.upper()!="Y" and go.upper()!="N":
+        print("Bad input")
+        go = input("Would you like to add another filter? (Y/N):")
+    if go.upper() == "Y":
+        filterhandle()
+    return()
 
 
 
