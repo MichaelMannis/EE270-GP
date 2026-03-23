@@ -30,20 +30,43 @@ end_long = []
 trip_distance_km= []
 avg_speed= []
 is_suspicious = [] # an array to tell if data is funky
-dayofweek = []
 wd = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+def readvalidate(data, i): # Return True if data would mess up later
+    a= 0
+    b=0.0
+    if len(data) != 25:
+        print("data on line "+str(i)+" is an invalid length and will be ignored")
+        return True
+    try:
+        a = 1
+        a = int(data[6]) # bikenumber cast
+        b= float(data[8]) # duration cast
+        a = int(data[14])
+        a =int(data[15])
+        b= float(data[17])
+        b= float(data[18])
+        b= float(data[19])
+        b= float(data[20])
+        b= float(data[21])
+        b= float(data[22])
+        b= float(data[23])
+        b= float(data[24])# just trust that this works.
+    except ValueError:
+        print("Data of incorrect type in row "+str(i)+" and will be ignored")
+        return True
+
 
 def reading():
     a=1 
     f = open("01_london_bike_trips_enriched_reduced.csv")
-    for lines in f:
+    for pos, lines in enumerate(f):
         if a ==1: #this chunk just ignores the first line
             a=0
             continue
         # below just reads the data into the arrays
         data = lines.split(",")
-        if len(data)<24:
-            print("not enough data in this line")
+        if readvalidate(data, pos):
             continue
         start_date.append(data[0])
         temp = (data[1]+","+data[2])
@@ -145,7 +168,6 @@ def inputvalidator():
         a = inputvalidator()
     return a
 
-
 def csvmaker():
     f = open("stations.csv","w")
     line = "Stations, Start, End \n"
@@ -155,12 +177,6 @@ def csvmaker():
         f.write(line)
     return
         
-def finddays():
-    for i in range(len(start_date)):
-        time_s = datetime.strptime((start_date[i].replace("/","-")), "%d-%m-%Y %H:%M")
-        day = wd[time_s.weekday()]
-        dayofweek.append(day)
-    return
 
 def dayinputvalidation():
     targetday = input("which day of the week are you interested in?: ")
@@ -204,14 +220,13 @@ def popping(popitems):
         trip_distance_km.pop(popitems[i])
         avg_speed.pop(popitems[i])
         is_suspicious.pop(popitems[i])
-        dayofweek.pop(popitems[i])
     return
         
 def dayfilter():
     day = dayinputvalidation()
     popitems=[]
     for i in range (len(start_date)):
-        if dayofweek[i] != day:
+        if start_day[i] != day:
             popitems.append(i)
     popping(popitems)
 
@@ -278,7 +293,6 @@ def endareafilter(area):
             popitems.append(i)
     popping(popitems)
         
-
 
 def suspiciousdatafilter():
     popitems = []
@@ -391,7 +405,6 @@ def station_useage():
  
 reading()
 validate()
-finddays()
 #station_useage()
 filterhandle()
 analysis()
