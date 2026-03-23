@@ -39,7 +39,6 @@ def readvalidate(data, i): # Return True if data would mess up later
         print("data on line "+str(i)+" is an invalid length and will be ignored")
         return True
     try:
-        a = 1
         a = int(data[6]) # bikenumber cast
         b= float(data[8]) # duration cast
         a = int(data[14])
@@ -411,6 +410,6 @@ def station_useage():
  
 reading()
 validate()
-#station_useage()
 filterhandle()
 analysis()
+station_useage()
