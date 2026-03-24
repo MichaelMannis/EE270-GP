@@ -99,3 +99,4 @@ start_date,start_station,end_date,end_station,bike_number,bike_model,duration_mi
 15/10/2025 23:39,"south parade, chelsea",16/10/2025 00:13,"rotherhithe roundabout, rotherhithe",64115,PBSC_EBIKE,33.6382,Normal(10-40 mins),normal,23,Wednesday,October,0,0,non_rush,0.004098361,0,51.48902,-0.17524,51.499169,-0.055846029,8.342260337821633,14.879976344432757
 15/10/2025 23:39,"globe town market, bethnal green",16/10/2025 00:10,"east india dlr, blackwall",59336,CLASSIC,30.53735,Normal(10-40 mins),normal,23,Wednesday,October,0,0,non_rush,0.003875969,0,51.528869,-0.047548,51.509474,-0.002275,3.8031024936082694,7.472362521
 15/10/2025 23:38,"duke street hill, london bridge",16/10/2025 01:02,"farm street, mayfair",54649,CLASSIC,84.5987,Long(41-120 mins),normal,23,Wednesday,October,0,0,non_rush,0.003634161,0.012820513,51.50630441,-0.087262995,51.50935171,-0.14744969,4.179194735398395,2.9640134437515435
+hello

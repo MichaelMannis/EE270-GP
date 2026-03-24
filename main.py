@@ -300,27 +300,27 @@ def suspiciousdatafilter():
     popping(popitems)
 
 def analysis():
-
-    number_of_journeys= 0 
-    minduration = 0 # will change from 0 in program
-    maxduration = 0 # duration cant be negative 
-    avg_duration = 0
-    maxdist = 0 # dist cant be negative
-    mindist = 0 # will change from 0 in program
-    avgdist = 0
     if len(start_date)== 0:
         print("There is no matching data for your current filters.")
         return
+    number_of_journeys= 0 
+    minduration = duration_min[0] #
+    maxduration = 0 # duration cant be negative 
+    avg_duration = 0
+    maxdist = 0 # dist cant be negative
+    mindist = trip_distance_km[0] # will change from 0 in program
+    avgdist = 0
+
     for i in range(len(start_date)):
         number_of_journeys+=1
-        if duration_min[i]<minduration or minduration==0:
+        if duration_min[i]<minduration:
                 minduration=duration_min[i]
         if duration_min[i]>maxduration: # duration cant be negative 
             maxduration=duration_min[i]
         avg_duration+=duration_min[i] # add all values and divide at end
         if trip_distance_km[i]>maxdist:
             maxdist= trip_distance_km[i]
-        if trip_distance_km[i]<mindist or mindist==0:
+        if trip_distance_km[i]<mindist:
             mindist=trip_distance_km[i]
         avgdist+=trip_distance_km[i]
     if number_of_journeys>0:
