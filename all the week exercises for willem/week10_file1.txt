@@ -1,0 +1,8 @@
+Name#Group#Sequence#Score 1#Score 2#Average
+Nigel#Red#3#12#17#45.5
+Phil#Blue#6#25#13#75.75
+Ruth#Green#1#25#25#100
+Elizabeth#Red#4#20#20#66.6667
+David#Green#5#18#3#90.0
+Jill#Blue#2#12.5#17#53.13777
+
