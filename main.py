@@ -335,14 +335,14 @@ def analysis():
 def filterhandle():
     area = ""
     print("""
-          ---------------------------
+          -----------------------------------------------
           Which filter would you like
           1. Day of the Week
           2. Distance Greater than X
           3. Journeys starting in a specific area
           4. Journeys ending in a specific area
           5. Suspicious data (has values that dont match)
-          Continue later
+          -----------------------------------------------
           """)
     selection = input("- ")
     while selection != "1" and selection != "2" and selection != "3" and selection !="4" and selection != "5":
