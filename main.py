@@ -289,6 +289,13 @@ def suspiciousdatafilter():
                 ignore.append(i)
     return()
 
+def rushfilter():
+    for i in range(len(start_date)):
+        if is_rush_hour[i] =="0":
+            if not(operator.contains(ignore, i)):
+                ignore.append(i)
+    return()
+
 
 def analysis():
     if len(start_date)== 0:
@@ -341,11 +348,12 @@ def filterhandle():
           2. Distance Greater than X
           3. Journeys starting in a specific area
           4. Journeys ending in a specific area
-          5. Suspicious data (has values that dont match)
+          5. Remove suspicious data (has values that dont match)
+          6. Only during rushes
           -----------------------------------------------
           """)
     selection = input("- ")
-    while selection != "1" and selection != "2" and selection != "3" and selection !="4" and selection != "5":
+    while selection != "1" and selection != "2" and selection != "3" and selection !="4" and selection != "5" and selection != "6":
         selection = input("Bad input enter a number 1-5: ")
     if selection =="1":
         ignore = dayfilter()
@@ -359,6 +367,8 @@ def filterhandle():
         ignore = endareafilter(area)
     elif selection =="5":
         ignore = suspiciousdatafilter()
+    elif selection =="6":
+        ignore = rushfilter()
     go = input("Would you like to add another filter? (Y/N):")
     while go.upper()!="Y" and go.upper()!="N":
         print("Bad input")
