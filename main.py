@@ -58,7 +58,7 @@ def readvalidate(data, i): # Return True if data would mess up later
 
 
 def reading():
-    a=1 
+    a=1
     f = open("01_london_bike_trips_enriched_02.csv")
     for pos, lines in enumerate(f):
         if a ==1: #this chunk just ignores the first line
@@ -94,6 +94,7 @@ def reading():
         trip_distance_km.append(float(data[23]))
         avg_speed.append(data[24])
     f.close()
+
 #above works
 def time_valid(i):
     calcmin = 0
@@ -128,6 +129,7 @@ def distance_valid(i):
     return False
 
 def validate():
+    suspiciouscounter = 0 
     for i in range(len(start_date)): # once for each set of data
         suspicious = "Not"
         if not(time_valid(i)):
@@ -138,6 +140,11 @@ def validate():
             else:
                 suspicious = suspicious+" & Bad Distance" # never happens but good for future proofing
         is_suspicious.append(suspicious)
+        if suspicious !="Not":
+            suspiciouscounter+=1
+    print(suspiciouscounter)
+    percentage_suspicious = (suspiciouscounter/len(start_date))*100
+    print(("The percentage of invalid data is "+str(percentage_suspicious)+"%"))
 
 def station_data():
     a = 0
