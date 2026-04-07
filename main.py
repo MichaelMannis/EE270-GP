@@ -1,7 +1,5 @@
-#imports
-from datetime import datetime
-from math import radians, cos, sin, asin, sqrt
-import operator
+import Validation as valid
+import filtering as filtering
 #define blank arrays for all data
 stations = []
 startvisits= []
@@ -95,49 +93,6 @@ def reading():
         avg_speed.append(data[24])
     f.close()
 #above works
-def time_valid(i):
-    calcmin = 0
-    time_s = datetime.strptime((start_date[i].replace("/","-")), "%d-%m-%Y %H:%M")
-    time_e = datetime.strptime((end_date[i].replace("/","-")), "%d-%m-%Y %H:%M")
-    diff = time_e-time_s
-    calcmin = (diff.total_seconds()/60) #datetime only has seconds 
-    if calcmin == round(float(duration_min[i]),0):
-        return True
-    
-    return False
-
-def haversine(lon1, lat1, lon2, lat2): # just trust me this works dw about it
-    # convert decimal degrees to radians 
-    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
-
-    # haversine formula 
-    dlon = lon2 - lon1 
-    dlat = lat2 - lat1 
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    c = 2 * asin(sqrt(a)) 
-    r = 6371 # Km assumption
-    return c * r
-
-def distance_valid(i):
-    calcdist = 0
-    if (trip_distance_km[i] == 0):
-        return False
-    calcdist = haversine(float(start_long[i]),float(start_lat[i]),float(end_long[i]),float(end_lat[i])) # i hate this but were required to use haversine
-    if round(calcdist,7) == round(float(trip_distance_km[i]),7): # maths is always funky so round to avoid floating point errors 
-        return True
-    return False
-
-def validate():
-    for i in range(len(start_date)): # once for each set of data
-        suspicious = "Not"
-        if not(time_valid(i)):
-            suspicious = "Bad time"
-        if not(distance_valid(i)):
-            if suspicious =="Not":
-                suspicious = "Bad distance"
-            else:
-                suspicious = suspicious+" & Bad Distance" # never happens but good for future proofing
-        is_suspicious.append(suspicious)
 
 def station_data():
     a = 0
@@ -183,107 +138,12 @@ def csvmaker():
         line = stations[i]+","+str(startvisits[i])+","+str(endvisits[i])+"\n"
         f.write(line)
     return
-        
 
-def dayinputvalidation():
-    targetday = input("which day of the week are you interested in?: ")
-    goodinput = False
-    for i in range(7):
-        if targetday.upper()==wd[i].upper(): #.upper to ignore capitalisation
-            goodinput = True
-            targetday = wd[i] # use this to ignore capitalisation in future
-    if goodinput:
-        return targetday
-    else:
-        print("Bad input please enter a day of the week: ")
-        targetday = dayinputvalidation()
-        return targetday
-        
-def dayfilter():
-    day = dayinputvalidation()
-    for i in range (len(start_date)):
-        if start_day[i] != day:
-            if not(operator.contains(ignore, i)):
-                ignore.append(i)
-    return()
-
-
-def bigdistfilter():
-    a= input("Enter a minmum distance: ")
-    invalid = True
-    while invalid:
-        try:
-            float(a)
-            invalid = False
-        except ValueError:
-            a = input("Enter a float: ")
-            invalid = True
-    a = float(a)
-    for i in range(len(start_date)):
-        if trip_distance_km[i]<a:
-            if not(operator.contains(ignore, i)):
-                ignore.append(i)
-    return()
-
-def areavalid():
-    matching = False
-    area = input("Please enter an area: ")
-    area = area.replace(" ","")
-    go = ""
-    for i in range(len(start_date)):
-        end_data = end_station[i].split(",")
-        endnew = end_data[1]
-        start_data = start_station[i].split(",")
-        new = start_data[1] # gets the bit after the comma
-        endnew = endnew.replace(" ","").replace('"',"")
-        new = new.replace(" ","").replace('"',"")
-        if area.upper() == new.upper() or area.upper() == endnew.upper():
-            matching= True
-    if matching== False:
-        print("There were no results found for this area do you wish to retry")
-        go = input("Y/N: ")
-        while go.upper() != "Y" and go.upper() != "N":
-            print("Bad input")
-            go = input("There were no results found for this area do you wish to retry (Y/N): ")
-    if go.upper() == "Y":
-        area = areavalid()
-        return area
-    elif go.upper() == "N":
-        return area
-    return area
-    
-
-def startareafilter(area):
-    for i in range(len(start_date)):
-        data = start_station[i].split(",")
-        new = data[1] # gets the bit after the comma
-        if area.upper().replace(" ","") != new.upper().replace(" ","").replace('"',""):#remove spaces and "
-            if not(operator.contains(ignore, i)):
-                ignore.append(i)
-    return()
-
-
-def endareafilter(area):
-
-    for i in range(len(start_date)):
-        data = end_station[i].split(",")
-        new = data[1] # gets the bit after the comma
-        if area.upper().replace(" ","") != new.upper().replace(" ","").replace('"',""):#remove spaces and "
-            if not(operator.contains(ignore, i)):
-                ignore.append(i)
-    return()
-
-        
-
-def suspiciousdatafilter():
-    for i in range(len(start_date)):
-        if is_suspicious[i] !="Not":
-            if not(operator.contains(ignore, i)):
-                ignore.append(i)
-    return()
-
-
-def analysis():
+def analysis(ignore):
+    #-------------- Very important removes repeated items and sorts
+    ignore = list(set(ignore))
+    ignore.sort()
+    #------------------
     if len(start_date)== 0:
         print("There is no matching data for your current filters.")
         return
@@ -325,42 +185,6 @@ def analysis():
     print("The minimum distance of journeys made is "+str(mindist))
     print("The average distance of journeys made is "+str(avgdist))
 
-def filterhandle():
-    area = ""
-    print("""
-          ---------------------------
-          Which filter would you like
-          1. Day of the Week
-          2. Distance Greater than X
-          3. Journeys starting in a specific area
-          4. Journeys ending in a specific area
-          5. Suspicious data (has values that dont match)
-          Continue later
-          """)
-    selection = input("- ")
-    while selection != "1" and selection != "2" and selection != "3" and selection !="4" and selection != "5":
-        selection = input("Bad input enter a number 1-5: ")
-    if selection =="1":
-        ignore = dayfilter()
-    elif selection =="2":
-        ignore = bigdistfilter()
-    elif selection =="3":
-        area = areavalid()
-        ignore = startareafilter(area)
-    elif selection == "4":
-        area = areavalid()
-        ignore = endareafilter(area)
-    elif selection =="5":
-        ignore = suspiciousdatafilter()
-    go = input("Would you like to add another filter? (Y/N):")
-    while go.upper()!="Y" and go.upper()!="N":
-        print("Bad input")
-        go = input("Would you like to add another filter? (Y/N):")
-    if go.upper() == "Y":
-        filterhandle()
-    return()
-
-
 
 def station_useage():
     station_data()
@@ -370,13 +194,11 @@ def station_useage():
 # This is a rolling window
     for i in range(len(stations)): # top 3
         if startvisits[i] > starts[0] or startvisits[i] > starts[1] or startvisits[i] > starts[2]:
-            starts.append(startvisits[i]) # adds to list 
+            starts[0] = startvisits[i] # adds to list 
             starts.sort() # sorts ascending
-            starts.pop(0) # pops lowest
         if endvisits[i] > ends[0] or endvisits[i] > ends[1] or endvisits[i] > ends[2]:
-            ends.append(endvisits[i]) # adds to list 
+            ends[0] = endvisits[i] # adds to list 
             ends.sort() # sorts ascending
-            ends.pop(0) # pops lowest
 #---------------------------------
     startmessage = "The three stations most started at are: "
     endmessage = "The three stations most ended at are: "
@@ -399,7 +221,7 @@ def station_useage():
     return
  
 reading()
-validate()
-filterhandle()
-analysis()
+valid.validate(start_date,is_suspicious,trip_distance_km,duration_min,end_date,start_long,start_lat,end_long,end_lat)
+filtering.filterhandle(start_date,start_day,ignore,start_station,end_station,trip_distance_km,is_suspicious)
+analysis(ignore)
 station_useage()
