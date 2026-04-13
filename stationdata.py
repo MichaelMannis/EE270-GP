@@ -1,4 +1,9 @@
 def station_useage(ignore,start_date,stations,start_station,end_station,startvisits,endvisits):
+    print("""
+          
+        Calcualting station data please wait...
+
+          """)
     station_data(ignore,start_date,stations,start_station,end_station,startvisits,endvisits)
     starts = [0,0,0] #full define array so it can be immutable at compilation
     ends = [0,0,0] # ^

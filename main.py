@@ -100,51 +100,6 @@ def suspiciousanalysis():
     percentage = str(round(counter/len(is_suspicious)*100,4))+"%"
     print("The percentage of suspicious data is "+percentage)
 
-def station_data():
-    a = 0
-    ignore.append(0)
-    for i in range(len(start_date)):
-        if i ==ignore[a]:
-            a+=1
-            continue
-#STARTING STATIONS
-        newstat = True
-        for m in range(len(stations)):
-            if start_station[i] == stations[m]:
-                newstat = False
-                startvisits[m]+=1
-        if newstat:
-            stations.append(start_station[i])
-            startvisits.append(1)
-            endvisits.append(0)
-#-----------------------------
-#ending stations
-        newstat = True
-        for m in range(len(stations)):
-            if end_station[i] == stations[m]:
-                newstat = False
-                endvisits[m]+=1
-        if newstat:
-            stations.append(end_station[i])
-            startvisits.append(0)
-            endvisits.append(1)
-#-----------------------------------
-def inputvalidator():
-    a = input("Would you like a CSV made? (Y/N): ")
-    if a.upper() != "Y" and a.upper() != "N":
-        print("Invalid input try again")
-        a = inputvalidator()
-    return a
-
-def csvmaker():
-    f = open("stations.csv","w")
-    line = "Stations, Start, End \n"
-    f.write(line)
-    for i in range(len(stations)):
-        line = stations[i]+","+str(startvisits[i])+","+str(endvisits[i])+"\n"
-        f.write(line)
-    return
-
 def analysis(ignore):
     if len(start_date)== 0:
         print("There is no matching data for your current filters.")
