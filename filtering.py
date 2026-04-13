@@ -1,4 +1,3 @@
-import operator
 wd = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 def filterhandle(startdate,startday,ignore,startstation,endstation,tripdist,suspicious):
     repeat = True
