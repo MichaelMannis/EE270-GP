@@ -1,5 +1,6 @@
 import Validation as valid
 import filtering as filtering
+import stationdata as stationdata
 #define blank arrays for all data
 stations = []
 startvisits= []
@@ -186,44 +187,10 @@ def analysis(ignore):
     print("The minimum distance of journeys made is "+str(mindist))
     print("The average distance of journeys made is "+str(avgdist))
 
-
-def station_useage():
-    station_data()
-    starts = [0,0,0] #full define array so it can be immutable at compilation
-    ends = [0,0,0] # ^
-    print("The number of unique stations is: "+str(len(stations)))
-# This is a rolling window
-    for i in range(len(stations)): # top 3
-        if startvisits[i] > starts[0] or startvisits[i] > starts[1] or startvisits[i] > starts[2]:
-            starts[0] = startvisits[i] # adds to list 
-            starts.sort() # sorts ascending
-        if endvisits[i] > ends[0] or endvisits[i] > ends[1] or endvisits[i] > ends[2]:
-            ends[0] = endvisits[i] # adds to list 
-            ends.sort() # sorts ascending
-#---------------------------------
-    startmessage = "The three stations most started at are: "
-    endmessage = "The three stations most ended at are: "
-    startapp=3 #cant append more than 3 times (if stations have the same number of starts/ends)
-    endapp = 3 # ^
-    for i in range(len(stations)):
-        if startvisits[i] >= starts[0]: # sorted array so only needs to be greater than smallest value
-            if startapp>0:
-                startmessage = startmessage +(stations[i].replace('"',""))+"; " # formatting 
-                startapp+=-1
-        if endvisits[i] >= ends[0]:
-            if endapp>0:
-                endmessage = endmessage +stations[i].replace('"',"")+"; " # formatting
-                endapp+=-1
-    print(startmessage)
-    print(endmessage)
-    csv = inputvalidator()
-    if csv.upper() == "Y":
-        csvmaker() 
-    return
  
 reading()
 valid.validate(start_date,is_suspicious,trip_distance_km,duration_min,end_date,start_long,start_lat,end_long,end_lat)
 suspiciousanalysis()
 filtering.filterhandle(start_date,start_day,ignore,start_station,end_station,trip_distance_km,is_suspicious)
 analysis(ignore)
-station_useage()
+stationdata.station_useage(ignore,start_date,stations,start_station,end_station,startvisits,endvisits)
