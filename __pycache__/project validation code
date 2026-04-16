@@ -1,0 +1,159 @@
+import csv
+import math
+from datetime import datetime,timedelta
+#READING LONDON BIKE TRIP CSV
+import_csv=input("input bike trip data csv=")
+with open(import_csv,"r")as files:
+    read=csv.reader(files)
+    next(files)
+    #SET UP SUSPICIOUS DATA CSV
+    import_suspicious_csv=input("input csv for suspicious data=")
+    with open(import_suspicious_csv,"w")as f :
+        w=csv.writer(f) 
+        w.writerow(["start_date","start_station","end_date","end_station","duration_min","trip_category","start_lat","start_long","end_lat","end_long","trip_distance_km","avg_speed"])
+        #SET US APPROVED DATA CSV
+        import_approved_csv=input("input csv for approved data=")
+        with open(import_approved_csv,"w")as f :
+            q=csv.writer(f) 
+            q.writerow(["start_date","start_station","end_date","end_station","duration_min","trip_category","start_lat","start_long","end_lat","end_long","trip_distance_km","avg_speed"])
+            number=0
+            #LOOP THROUGH EACH ROW OF CSV
+            for lines in read:
+                #LABEL EACH ROW
+                number=number+1
+                print("row number:",number)
+                #TEST 1, TIME DURATION MATCHES TIME CATEGORY
+                time=float(lines[6])
+                time_type=lines[7]
+                #CHECK IF TIME FITS LIMIT
+                if time_type=="Short(1-10 mins)":
+                    if 1<time<10:
+    #                    print("test 1:good")
+                        a1=1
+                    else:
+     #                   print("test 1:no")
+                        a1=0
+                        lines.append("data under wrong trip category")
+                #CHECK IF TIME FITS LIMIT
+                elif time_type=="Normal(10-40 mins)":
+                    if 10<time<40:
+      #                  print("test 1:good")
+                        a1=1
+                    else:
+       #                 print("test 1:no")
+                        a1=0
+                        lines.append("data under wrong trip category")
+                #TEST 2, IF VELOCITY = 0 
+                if float(lines[22])>0:
+        #            print("test 2:good")
+                    a2=1
+                    #TEST 3, IF VELOCITY ABOVE 0 TEST VELOCIT MATCHES DISTANCE/TIME
+                    #TIME,S
+                    time_sec=float(lines[6])/60
+                    #DISTANCE,KM
+                    dist_km=float(lines[21])
+                    #VELOCITY,KM/S
+                    velocity=float(lines[22])
+                    #VELOCITY TOLERANCE
+                    velocity_plus=(dist_km/time_sec)+1
+                    velocity_minus=(dist_km/time_sec)-1
+                    #VELOCITY FITS IN LIMITS
+                    if velocity_minus<velocity<velocity_plus:
+         #               print("test 3:good")
+                        a3=1
+                    else:
+          #              print("test 3:no")
+                        a3=0
+                        lines.append("distance/time doesn't equal velocity")
+                else:
+           #         print("test 2:no")
+                    a2=0
+                    a3=0
+                    lines.append("displacement is 0 so velocity is 0")
+                    #TEST 3 DOESN'T HAPPEND IF THERE IS NO VELOCITY
+            #        print("test 3:no")
+                    lines.append("distance/time doesn't equal velocity")
+                #TEST 4, TIME DURATION MATHCES START AND END TIMES
+                #CONVERT CSV START AND END TIME INTO TIME FORMAT
+                form_dts=datetime.strptime(lines[0],"%d/%m/%Y %H:%M")
+                form_dte=datetime.strptime(lines[2],"%d/%m/%Y %H:%M")
+                #CALCULATE DIFFERENCE IN TIME
+                time_dif=form_dte-form_dts
+                #CONVERT CSV TIME DURATION INTO TIME FORMAT
+                num = float(lines[6])
+                decimal_places = len(str(num).split('.')[1])
+                time=round(float(lines[6])+0.1111111,ndigits=(5))
+                usetime_dif=str(time_dif)
+                convert_time=str(timedelta(minutes=time))
+                compare_time=datetime.strptime(convert_time,"%H:%M:%S.%f")
+                #CONVERT CALCULATED TIME DIFFERENCE
+                time_limit=datetime.strptime(usetime_dif,"%H:%M:%S")
+                #SET TIME TOLERANCE
+                minus_time=time_limit-timedelta(minutes=1)
+                positive_time=time_limit+timedelta(minutes=1)
+                #TIME FITS IN LIMITS
+                if minus_time<compare_time<positive_time:
+             #       print("test 4:good")
+                    a4=1
+                else:
+              #      print("test 4:no")
+                    a4=0
+                    lines.append("time data is inconsistant")
+                #TEST 5, LONGATUDE AND LATITUDE DIFFERNCE MATCHES DISTANCE
+                #CONVERT LONGATUDE AND LATITUE INTO RADIANS
+                start_lat=float(lines[17])*(math.pi/180)
+                start_lon=float(lines[18])*(math.pi/180)
+                end_lat=float(lines[19])*(math.pi/180)
+                end_lon=float(lines[20])*(math.pi/180)
+                #FIND AVERAGE LATITUDE
+                average_lat=((start_lat+end_lat)/2)*(math.pi/180)
+                #DIFFERENCE IN X VARIABLE
+                diff_x=(end_lon-start_lon)*math.cos(average_lat)
+                #DIFFERENCE IN Y VARIABLE
+                diff_y=end_lat-start_lat
+                #DISPLACEMENT FORMULA 
+                formula_p1=abs((diff_x**2)-(diff_y**2))
+                dist_formula=(6371000*math.sqrt(formula_p1))/1000
+                #SET DISTANCE TOLERANCE
+                #ACCOUNT FOR TRIP DEVIATIONS
+                dist_plus=float(lines[21])+2
+                #TRIP DISTANCE LESS THAN DISPLACEMENT IS VERY UNLIKELY
+                dist_minus=float(lines[21])-0.5
+                #DISTANCE FITS IN LIMITS
+                if dist_minus<dist_formula<dist_plus:
+               #     print("test 5:good")
+                    a5=1
+                else:
+                #    print("test 5:no")
+                    a5=0
+                    lines.append("distance data is inconsistant")
+                #TRIGGER TO SEND ROW INTO SUSPICIOUS CSV
+                a=a1*a2*a3*a4*a5
+                if a==0 :
+                    w.writerow(lines)
+                else:
+                    q.writerow(lines)
+#FIND SUSPICIOUS DATA AMOUNT AND PERCENTAGE OF WHOLE CSV
+#READ LONDON BIKE TRIP CSV
+with open(import_csv,"r")as read_csv :
+    lines_csv=csv.reader(read_csv) 
+    #READ SUSPICIOUS CSV 
+    with open(import_suspicious_csv,"r")as c :
+        lines_suspicious=csv.reader(c)
+        #FIND LOND BIKE TRIP CSV DATA AMOUNT
+        row=0
+        for e in lines_csv:
+            row=row+1
+        row=row-1
+        #FIND SUSPICIOUS CSV DATA AMOUNT
+        suspicious_row=0
+        for h in lines_suspicious:
+            suspicious_row=suspicious_row+1
+        suspicious_row=(suspicious_row-2)/2
+        #APPEND SUSPICIOUS CSV WITH AMOUNT AND PERCENTAGE
+        h=open(import_suspicious_csv,"a",newline="")
+        j=csv.writer(h)
+        j.writerow(["number of suspicious data",suspicious_row,"percentage of suspicious data:",(suspicious_row/row)*100,"%"])
+        print("number of suspicious data:",suspicious_row)
+        print("percentage of suspicious data:",(suspicious_row/row)*100,"%")
+        h.close()
